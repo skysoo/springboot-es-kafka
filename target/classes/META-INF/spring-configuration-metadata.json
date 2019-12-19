@@ -1,0 +1,28 @@
+{
+  "groups": [
+    {
+      "name": "elasticsearch",
+      "type": "com.elastic.config.Properties",
+      "sourceType": "com.elastic.config.Properties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "elasticsearch.cluster",
+      "type": "java.lang.String",
+      "sourceType": "com.elastic.config.Properties"
+    },
+    {
+      "name": "elasticsearch.host",
+      "type": "java.lang.String",
+      "sourceType": "com.elastic.config.Properties"
+    },
+    {
+      "name": "elasticsearch.port",
+      "type": "java.lang.Integer",
+      "sourceType": "com.elastic.config.Properties",
+      "defaultValue": 0
+    }
+  ],
+  "hints": []
+}
