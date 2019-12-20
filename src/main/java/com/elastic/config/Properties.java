@@ -11,17 +11,17 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "elasticsearch")
 public class Properties {
+    private String protocol;
     private String host;
     private int port;
     private String cluster;
 
-    @Override
-    public String toString() {
-        return "Properties{" +
-                "host='" + host + '\'' +
-                ", port=" + port +
-                ", cluster='" + cluster + '\'' +
-                '}';
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     public String getHost() {
@@ -46,5 +46,15 @@ public class Properties {
 
     public void setCluster(String cluster) {
         this.cluster = cluster;
+    }
+
+    @Override
+    public String toString() {
+        return "Properties{" +
+                "protocol='" + protocol + '\'' +
+                ", host='" + host + '\'' +
+                ", port=" + port +
+                ", cluster='" + cluster + '\'' +
+                '}';
     }
 }

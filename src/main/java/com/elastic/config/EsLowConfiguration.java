@@ -1,5 +1,6 @@
 package com.elastic.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.BufferedReader;
@@ -17,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
  * @version 1.0.0
  * @since 2019-12-18 오후 4:05
  **/
+@Slf4j
 @Configuration
 public class EsLowConfiguration {
     private final InitHttpsIgnore initHttpsIgnore;
@@ -25,48 +27,113 @@ public class EsLowConfiguration {
         this.initHttpsIgnore = initHttpsIgnore;
     }
 
-    public void get(String strUrl) {
+    public boolean get(String strUrl,String method) {
+        boolean result = false;
         try {
             initHttpsIgnore.initializeHttpConnection();
 
             HttpURLConnection con = getConn(strUrl, "GET");
-            System.out.println(">>> success get's connection get ");
+            log.debug(">>> success get's connection get ");
 
             StringBuilder sb = getResponse(con);
-            System.out.println(sb.toString());
+            if (sb==null) {
+                log.warn(">>> {} get's response is null",strUrl);
+                return false;
+            }
+
+            if (method.equals("search"))
+                log.info("searched doc length is {}",sb.length());
+
+            if(con.getResponseCode()== HttpURLConnection.HTTP_OK) result = true;
 
             con.disconnect();
-            System.out.println("connection is closed");
+            log.debug("connection is closed");
 
         } catch (NoSuchAlgorithmException | KeyManagementException | IOException e) {
-            e.printStackTrace();
+            log.error("", e);
         }
-
+        return result;
     }
 
-    public void put(String strUrl, String jsonMessage) {
+    public boolean put(String strUrl, String jsonMessage) {
+        boolean result = false;
         try {
             HttpURLConnection con = getConn(strUrl, "PUT");
-            System.out.println(">>> success put's connection get ");
+            log.debug(">>> success put's connection get ");
 
             OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
             wr.write(jsonMessage); //json 형식의 message 전달
             wr.flush();
 
             StringBuilder sb = getResponse(con);
-            System.out.println(sb.toString());
+            if (sb==null) {
+                log.warn(">>> {} put's response is null",strUrl);
+                return false;
+            }
+
+            if(con.getResponseCode()== HttpURLConnection.HTTP_OK) result = true;
 
             con.disconnect();
-            System.out.println("connection is closed");
+            log.debug("connection is closed");
 
         } catch (Exception e) {
-            System.err.println(e.toString());
+            log.error("",e);
         }
+        return result;
+    }
+
+    public boolean post(String strUrl, String jsonMessage) {
+        boolean result = false;
+        try {
+            HttpURLConnection con = getConn(strUrl, "POST");
+            log.debug(">>> success post's connection get ");
+
+            OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+            wr.write(jsonMessage); //json 형식의 message 전달
+            wr.flush();
+
+            StringBuilder sb = getResponse(con);
+            if (sb==null) {
+                log.warn(">>> {} post's response is null",strUrl);
+                return false;
+            }
+//            log.info(sb.toString());
+            if(con.getResponseCode()== HttpURLConnection.HTTP_OK ||
+                    con.getResponseCode() == HttpURLConnection.HTTP_CREATED) result = true;
+
+            con.disconnect();
+            log.debug("connection is closed");
+
+        } catch (Exception e) {
+            log.error("",e);
+        }
+        return result;
+    }
+
+    public boolean delete(String strUrl){
+        boolean result = false;
+        try {
+            HttpURLConnection con = getConn(strUrl, "DELETE");
+            log.debug(">>> success delete's connection get ");
+
+            StringBuilder sb = getResponse(con);
+            log.info(sb.toString());
+
+            if(con.getResponseCode()== HttpURLConnection.HTTP_OK) result = true;
+
+            con.disconnect();
+            log.debug("connection is closed");
+
+        } catch (IOException e) {
+            log.error("",e);
+        }
+        return result;
     }
 
     public StringBuilder getResponse(HttpURLConnection con) throws IOException {
         StringBuilder sb = new StringBuilder();
-        if (con.getResponseCode() == HttpURLConnection.HTTP_OK) {
+        if (con.getResponseCode() == HttpURLConnection.HTTP_OK ||
+                con.getResponseCode() == HttpURLConnection.HTTP_CREATED) {
             try {
                 BufferedReader br = new BufferedReader(
                         new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
@@ -76,42 +143,80 @@ public class EsLowConfiguration {
                 }
 
                 br.close();
+                log.debug("##### Response is Normal");
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("",e);
             }
             return sb;
         } else {
-            System.out.println("error is " + con.getResponseCode());
+            log.error("error is " + con.getResponseCode());
             return null;
         }
     }
 
-    public HttpURLConnection getConn(String strUrl, String method) throws IOException {
+    public HttpURLConnection getConn(String strUrl, String method) {
         HttpURLConnection con = null;
         try {
             URL url = new URL(strUrl);
             con = (HttpURLConnection) url.openConnection();
-            con.setConnectTimeout(5000); //서버에 연결되는 Timeout 시간 설정
-            con.setReadTimeout(5000); // InputStream 읽어 오는 Timeout 시간 설정
+            con.setConnectTimeout(15000); //서버에 연결되는 Timeout 시간 설정
+            con.setReadTimeout(30000); // InputStream 읽어 오는 Timeout 시간 설정
             con.setRequestMethod(method);
-//            System.out.println("#1 "+con.getResponseCode());
 
-            if (method.equals("GET")) {
-                con.setDoOutput(false);
-            } else if (method.equals("PUT")) {
-                //json으로 message를 전달하고자 할 때
-                con.setRequestProperty("Content-Type", "application/json");
-                con.setDoInput(true);
-                con.setDoOutput(true); //POST 데이터를 OutputStream으로 넘겨 주겠다는 설정
-                con.setUseCaches(false);
-                con.setDefaultUseCaches(false);
-            } else {
-                System.out.println("Don't used the Connection Method! >>> " + method);
+            switch (method){
+                case "GET":
+                    con.setDoOutput(false);
+                    break;
+                case "DELETE":
+                    con.setDoOutput(true);
+                    break;
+                case "PUT":
+                    con.setRequestProperty("Content-Type", "application/json");
+                    con.setDoInput(true);
+                    con.setDoOutput(true); //POST 데이터를 OutputStream으로 넘겨 주겠다는 설정
+                    con.setUseCaches(false);
+                    con.setDefaultUseCaches(false);
+                    break;
+                case "POST":
+                    con.setRequestMethod("POST");
+                    con.setRequestProperty("Content-Type", "application/json");
+                    con.setDoInput(true);
+                    con.setDoOutput(true); //POST 데이터를 OutputStream으로 넘겨 주겠다는 설정
+                    con.setUseCaches(false);
+                    con.setDefaultUseCaches(false);
+                    break;
+                default:
+                    log.warn("Don't used the Connection Method! {} >>> ",method);
+                    break;
             }
+
+//            if (method.equals("GET")) {
+//                con.setDoOutput(false);
+//            } else if(method.equals("DELETE")) {
+//                con.setDoOutput(true);
+//            } else if (method.equals("PUT")) {
+//                //json으로 message를 전달하고자 할 때
+//                con.setRequestProperty("Content-Type", "application/json");
+//                con.setDoInput(true);
+//                con.setDoOutput(true); //POST 데이터를 OutputStream으로 넘겨 주겠다는 설정
+//                con.setUseCaches(false);
+//                con.setDefaultUseCaches(false);
+//            } else if (method.equals("POST")) {
+//                con.setRequestMethod("POST");
+//                con.setRequestProperty("Content-Type", "application/json");
+//                con.setDoInput(true);
+//                con.setDoOutput(true); //POST 데이터를 OutputStream으로 넘겨 주겠다는 설정
+//                con.setUseCaches(false);
+//                con.setDefaultUseCaches(false);
+//            } else {
+//                log.warn("Don't used the Connection Method! {} >>> ",method);
+//            }
         } catch (IOException e) {
-            System.out.println("url = " + strUrl + " / method = " + method);
-            e.printStackTrace();
+            log.error("url = " + strUrl + " / method = " + method);
+            log.error("",e);
         }
+        if(con==null)
+            log.warn(">>> failed {}'s connection get ",method);
         return con;
     }
 }
