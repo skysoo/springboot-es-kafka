@@ -27,7 +27,7 @@ public class EsLowConfiguration {
         this.initHttpsIgnore = initHttpsIgnore;
     }
 
-    public boolean get(String strUrl,String method) {
+    public boolean get(String strUrl, String method) {
         boolean result = false;
         try {
             initHttpsIgnore.initializeHttpConnection();
@@ -36,18 +36,17 @@ public class EsLowConfiguration {
             log.debug(">>> success get's connection get ");
 
             StringBuilder sb = getResponse(con);
-            if (sb==null) {
-                log.warn(">>> {} get's response is null",strUrl);
+            if (sb == null) {
+                log.warn(">>> {} get's response is null", strUrl);
                 return false;
             }
 
             if (method.equals("search")) {
-                log.info("##### searched doc length is {}",sb.length());
-            } else if(method.equals("count")){
-                log.info("##### searched doc count is {}",sb.length());
+                log.info("##### searched doc length is {}", sb.length());
+            } else if (method.equals("count")) {
+                log.info("##### searched doc count is {}", sb.length());
             }
-
-            if(con.getResponseCode()== HttpURLConnection.HTTP_OK) result = true;
+            if (con.getResponseCode() == HttpURLConnection.HTTP_OK) result = true;
 
             con.disconnect();
             log.debug("connection is closed");
@@ -69,18 +68,18 @@ public class EsLowConfiguration {
             wr.flush();
 
             StringBuilder sb = getResponse(con);
-            if (sb==null) {
-                log.warn(">>> {} put's response is null",strUrl);
+            if (sb == null) {
+                log.warn(">>> {} put's response is null", strUrl);
                 return false;
             }
 
-            if(con.getResponseCode()== HttpURLConnection.HTTP_OK) result = true;
+            if (con.getResponseCode() == HttpURLConnection.HTTP_OK) result = true;
 
             con.disconnect();
             log.debug("connection is closed");
 
         } catch (Exception e) {
-            log.error("",e);
+            log.error("", e);
         }
         return result;
     }
@@ -96,24 +95,24 @@ public class EsLowConfiguration {
             wr.flush();
 
             StringBuilder sb = getResponse(con);
-            if (sb==null) {
-                log.warn(">>> {} post's response is null",strUrl);
+            if (sb == null) {
+                log.warn(">>> {} post's response is null", strUrl);
                 return false;
             }
-//            log.info(sb.toString());
-            if(con.getResponseCode()== HttpURLConnection.HTTP_OK ||
+
+            if (con.getResponseCode() == HttpURLConnection.HTTP_OK ||
                     con.getResponseCode() == HttpURLConnection.HTTP_CREATED) result = true;
 
             con.disconnect();
             log.debug("connection is closed");
 
         } catch (Exception e) {
-            log.error("",e);
+            log.error("", e);
         }
         return result;
     }
 
-    public boolean delete(String strUrl){
+    public boolean delete(String strUrl) {
         boolean result = false;
         try {
             HttpURLConnection con = getConn(strUrl, "DELETE");
@@ -122,13 +121,13 @@ public class EsLowConfiguration {
             StringBuilder sb = getResponse(con);
             log.info(sb.toString());
 
-            if(con.getResponseCode()== HttpURLConnection.HTTP_OK) result = true;
+            if (con.getResponseCode() == HttpURLConnection.HTTP_OK) result = true;
 
             con.disconnect();
             log.debug("connection is closed");
 
         } catch (IOException e) {
-            log.error("",e);
+            log.error("", e);
         }
         return result;
     }
@@ -148,7 +147,7 @@ public class EsLowConfiguration {
                 br.close();
                 log.debug("##### Response is Normal");
             } catch (IOException e) {
-                log.error("",e);
+                log.error("", e);
             }
             return sb;
         } else {
@@ -166,7 +165,7 @@ public class EsLowConfiguration {
             con.setReadTimeout(30000); // InputStream 읽어 오는 Timeout 시간 설정
             con.setRequestMethod(method);
 
-            switch (method){
+            switch (method) {
                 case "GET":
                     con.setDoOutput(false);
                     break;
@@ -189,37 +188,16 @@ public class EsLowConfiguration {
                     con.setDefaultUseCaches(false);
                     break;
                 default:
-                    log.warn("Don't used the Connection Method! {} >>> ",method);
+                    log.warn("Don't used the Connection Method! {} >>> ", method);
                     break;
             }
 
-//            if (method.equals("GET")) {
-//                con.setDoOutput(false);
-//            } else if(method.equals("DELETE")) {
-//                con.setDoOutput(true);
-//            } else if (method.equals("PUT")) {
-//                //json으로 message를 전달하고자 할 때
-//                con.setRequestProperty("Content-Type", "application/json");
-//                con.setDoInput(true);
-//                con.setDoOutput(true); //POST 데이터를 OutputStream으로 넘겨 주겠다는 설정
-//                con.setUseCaches(false);
-//                con.setDefaultUseCaches(false);
-//            } else if (method.equals("POST")) {
-//                con.setRequestMethod("POST");
-//                con.setRequestProperty("Content-Type", "application/json");
-//                con.setDoInput(true);
-//                con.setDoOutput(true); //POST 데이터를 OutputStream으로 넘겨 주겠다는 설정
-//                con.setUseCaches(false);
-//                con.setDefaultUseCaches(false);
-//            } else {
-//                log.warn("Don't used the Connection Method! {} >>> ",method);
-//            }
         } catch (IOException e) {
             log.error("url = " + strUrl + " / method = " + method);
-            log.error("",e);
+            log.error("", e);
         }
-        if(con==null)
-            log.warn(">>> failed {}'s connection get ",method);
+        if (con == null)
+            log.warn(">>> failed {}'s connection get ", method);
         return con;
     }
 }
