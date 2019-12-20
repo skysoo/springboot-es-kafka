@@ -22,6 +22,11 @@
       "type": "java.lang.Integer",
       "sourceType": "com.elastic.config.Properties",
       "defaultValue": 0
+    },
+    {
+      "name": "elasticsearch.protocol",
+      "type": "java.lang.String",
+      "sourceType": "com.elastic.config.Properties"
     }
   ],
   "hints": []

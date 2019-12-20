@@ -13,18 +13,13 @@ import java.security.NoSuchAlgorithmException;
  **/
 @Component
 public class InitHttpsIgnore {
-    HostnameVerifier allHostsValid;
 
     void initializeHttpConnection() throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext sc = SSLContext.getInstance("SSL");
         sc.init(null, createTrustManagers(), new java.security.SecureRandom());
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
-        allHostsValid = new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
-                return true;
-            }
-        };
+        HostnameVerifier allHostsValid = (hostname, session) -> true;
         HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
     }
 
