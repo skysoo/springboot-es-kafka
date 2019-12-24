@@ -60,6 +60,7 @@ public class HUCConfiguration {
     public boolean put(String strUrl, String jsonMessage) {
         boolean result = false;
         try {
+            initHttpsIgnore.initializeHttpConnection();
             HttpURLConnection con = getConn(strUrl, "PUT");
             log.debug(">>> success put's connection get ");
 
@@ -87,6 +88,7 @@ public class HUCConfiguration {
     public boolean post(String strUrl, String jsonMessage) {
         boolean result = false;
         try {
+            initHttpsIgnore.initializeHttpConnection();
             HttpURLConnection con = getConn(strUrl, "POST");
             log.debug(">>> success post's connection get ");
 
@@ -115,6 +117,7 @@ public class HUCConfiguration {
     public boolean delete(String strUrl) {
         boolean result = false;
         try {
+            initHttpsIgnore.initializeHttpConnection();
             HttpURLConnection con = getConn(strUrl, "DELETE");
             log.debug(">>> success delete's connection get ");
 
@@ -128,6 +131,8 @@ public class HUCConfiguration {
 
         } catch (IOException e) {
             log.error("", e);
+        } catch (NoSuchAlgorithmException | KeyManagementException e) {
+            e.printStackTrace();
         }
         return result;
     }
@@ -161,8 +166,8 @@ public class HUCConfiguration {
         try {
             URL url = new URL(strUrl);
             con = (HttpURLConnection) url.openConnection();
-            con.setConnectTimeout(15000); //서버에 연결되는 Timeout 시간 설정
-            con.setReadTimeout(30000); // InputStream 읽어 오는 Timeout 시간 설정
+            con.setConnectTimeout(30000); //서버에 연결되는 Timeout 시간 설정
+            con.setReadTimeout(60000); // InputStream 읽어 오는 Timeout 시간 설정
             con.setRequestMethod(method);
 
             switch (method) {

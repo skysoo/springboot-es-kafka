@@ -2,9 +2,13 @@ package com.elastic.service;
 
 import com.elastic.aop.LogExecutionTime;
 import com.elastic.config.HUCConfiguration;
+import com.elastic.config.InitHttpsIgnore;
 import com.elastic.config.Properties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * @author skysoo
@@ -59,12 +63,17 @@ public class HUCController {
         if (noiseData == null)
             log.warn("##### Noise Data Download Failed / fileName : {}",fileName);
         log.info("##### Success the Noise Data Download from Local {}",fileName);
-        esIndexSave(indexName);
+//        esIndexSave(indexName);
     }
 
     @LogExecutionTime
     @PostMapping("/post_noise_data")
-    public void esIndexSave(@RequestParam String indexName){
+    public void esIndexSave(@RequestParam String indexName,@RequestParam String fileName){
+        noiseData = noiseDataManager.getNoiseData("D:\\99.TEMP\\noise\\"+fileName);
+        if (noiseData == null)
+            log.warn("##### Noise Data Download Failed / fileName : {}",fileName);
+        log.info("##### Success the Noise Data Download from Local {}",fileName);
+
         if(noiseData.isEmpty()) {
             log.warn("Data is empty / {} {}",noiseData,this.getClass().getName());
             return;

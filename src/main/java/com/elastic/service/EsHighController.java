@@ -5,8 +5,6 @@ import com.elastic.config.EsHighConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-
 /**
  * @author skysoo
  * @version 1.0.0
@@ -47,17 +45,9 @@ public class EsHighController {
     }
 
     @LogExecutionTime
-    @PostMapping("/post_bulk_index")
-    public void esBulkIndex(@RequestParam String fileName) throws IOException {
-//        esHighConfiguration.bulkByIndex(fileName);
-//        esHighConfiguration.getRandomData(fileName);
-        esHighConfiguration.getRandomRealData(fileName);
-    }
-
-    @LogExecutionTime
-    @PostMapping("/post_bulk_processor_index")
-    public void esBulkProcessorIndex(@RequestParam String indexName){
-        esHighConfiguration.bulkProcessorByIndexName(indexName);
+    @PostMapping("/post_bulk_noise")
+    public void esBulkNoise(@RequestParam String indexName,@RequestParam int lineNum,@RequestParam int bundleNum){
+        esHighConfiguration.bulkNoiseData(indexName,lineNum,bundleNum);
     }
 
 }
