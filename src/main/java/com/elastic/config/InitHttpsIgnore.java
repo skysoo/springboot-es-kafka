@@ -16,15 +16,16 @@ public class InitHttpsIgnore {
 
     void initializeHttpConnection() throws NoSuchAlgorithmException, KeyManagementException {
         SSLContext sc = SSLContext.getInstance("SSL");
-        sc.init(null, createTrustManagers(), new java.security.SecureRandom());
+        TrustManager(sc);
+
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
 
         HostnameVerifier allHostsValid = (hostname, session) -> true;
         HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
     }
 
-    private TrustManager[] createTrustManagers() {
-        return new TrustManager[]{new X509TrustManager() {
+    static void TrustManager(SSLContext sc) throws KeyManagementException {
+        sc.init(null, new TrustManager[]{new X509TrustManager() {
             public void checkClientTrusted(java.security.cert.X509Certificate[] x509Certificates, String s) {
             }
 
@@ -34,7 +35,21 @@ public class InitHttpsIgnore {
             public java.security.cert.X509Certificate[] getAcceptedIssuers() {
                 return new java.security.cert.X509Certificate[]{};
             }
-        }};
+        }}, new java.security.SecureRandom());
     }
+
+    //    private TrustManager[] createTrustManagers() {
+//        return new TrustManager[]{new X509TrustManager() {
+//            public void checkClientTrusted(java.security.cert.X509Certificate[] x509Certificates, String s) {
+//            }
+//
+//            public void checkServerTrusted(java.security.cert.X509Certificate[] x509Certificates, String s) {
+//            }
+//
+//            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+//                return new java.security.cert.X509Certificate[]{};
+//            }
+//        }};
+//    }
 
 }
