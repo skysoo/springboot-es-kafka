@@ -1,10 +1,9 @@
 package com.elastic.config;
 
 import com.elastic.service.NoiseDataManager;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.internal.LinkedTreeMap;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHost;
-import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BackoffPolicy;
@@ -12,15 +11,16 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
+import org.elasticsearch.common.StopWatch;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
@@ -35,7 +35,9 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -48,47 +50,34 @@ import java.util.stream.Stream;
 @Configuration
 public class EsHighConfiguration {
     private final Properties properties;
-    private final ObjectMapper objectMapper;
     private final NoiseDataManager noiseDataManager;
 
-    public EsHighConfiguration(Properties properties, NoiseDataManager noiseDataManager, ObjectMapper objectMapper) {
+    public EsHighConfiguration(Properties properties, NoiseDataManager noiseDataManager) {
         this.properties = properties;
         this.noiseDataManager = noiseDataManager;
-        this.objectMapper = objectMapper;
     }
 
     @Bean
     protected RestHighLevelClient restHighLevelClient() {
         RestHighLevelClient restHighLevelClient = null;
-
         try {
             SSLContext sc = SSLContext.getInstance("SSL");
             InitHttpsIgnore.TrustManager(sc);
-
             restHighLevelClient = new RestHighLevelClient(RestClient.builder(
                     new HttpHost(properties.getHost(), properties.getPort(), properties.getProtocol()))
-                    .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
-                        @Override
-                        public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpAsyncClientBuilder) {
-                            return httpAsyncClientBuilder.setSSLContext(sc)
-                                    .setSSLHostnameVerifier((hostname, session) -> true);
-                        }
-                    }).setRequestConfigCallback(builder ->
+                    .setHttpClientConfigCallback(httpAsyncClientBuilder -> httpAsyncClientBuilder.setSSLContext(sc)
+                            .setSSLHostnameVerifier((hostname, session) -> true)).setRequestConfigCallback(builder ->
                             builder.setConnectTimeout(90000)
                                     .setSocketTimeout(90000))
             );
-
         } catch (NoSuchAlgorithmException | KeyManagementException e) {
             log.error("", e);
         }
-
-        log.info(properties.toString());
-
         return restHighLevelClient;
     }
 
     public void connectionCheck() {
-        boolean esPingResult = false;
+        boolean esPingResult;
         try {
             esPingResult = restHighLevelClient().ping(RequestOptions.DEFAULT);
             if (esPingResult) log.info("##### Es Server Connection is Normal. ");
@@ -103,7 +92,7 @@ public class EsHighConfiguration {
         searchSourceBuilder.query(QueryBuilders.matchAllQuery());
         searchSourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
         searchRequest.source(searchSourceBuilder);
-        SearchResponse searchResponse = null;
+        SearchResponse searchResponse;
 
         try {
             searchResponse = restHighLevelClient().search(searchRequest, RequestOptions.DEFAULT);
@@ -156,46 +145,91 @@ public class EsHighConfiguration {
         restHighLevelClient().indices().deleteAsync(deleteIndexRequest, RequestOptions.DEFAULT, listener);
     }
 
-    public void bulkNoiseData(String indexName,int lineNum,int bundleNum) {
-        List<LinkedHashMap<Integer, String>> noiseList = new ArrayList<>();
-        LinkedHashMap<Integer, String> noiseMap = null;
+    public void indexNoiseData(String indexName,int lineNum,int bundleNum){
+//        List<LinkedTreeMap<String, String>> noiseList = new ArrayList<>();
+        LinkedTreeMap<String, String> noiseMap;
 
-        BulkRequest request = new BulkRequest();
-        List<String> fileList = noiseDataManager.getFileList("D:\\99.TEMP\\noise");
+        List<String> fileList = noiseDataManager.getFileList(properties.getFilepath());
         try {
             // TODO: 2019-12-24 Thread 처리하도록 구현
+
+            for (String file : fileList) {
+                noiseMap = noiseDataManager.getRandomAccessData(file, lineNum, bundleNum);
+                IndexRequest indexRequest = new IndexRequest()
+                        .index(indexName)
+                        .source(noiseMap);
+
+                log.info(String.valueOf(noiseMap.size()));
+
+                for (String key : noiseMap.keySet()){
+                    log.info(String.valueOf(noiseMap.get(key).length()));
+                }
+
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
+
+                IndexResponse indexResponse = restHighLevelClient().index(indexRequest, RequestOptions.DEFAULT);
+                log.info(indexResponse.toString());
+
+                stopWatch.stop();
+                System.out.println(stopWatch.prettyPrint());
+                log.info("##### Success get File is {}", file);
+            }
+
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void bulkNoiseData(String indexName,int lineNum,int bundleNum) {
+        List<LinkedTreeMap<String, String>> noiseList = new ArrayList<>();
+        LinkedTreeMap<String, String> noiseMap;
+
+        BulkRequest request = new BulkRequest();
+        List<String> fileList = noiseDataManager.getFileList(properties.getFilepath());
+        try {
+            // TODO: 2019-12-24 Thread 처리하도록 구현
+
             for (String file : fileList) {
                 noiseMap = noiseDataManager.getRandomAccessData(file,lineNum,bundleNum);
                 noiseList.add(noiseMap);
                 log.info("##### Success get File is {}",file);
             }
 
-            Stream<IndexRequest> indexRequestStream = noiseList.stream().map(stream -> new IndexRequest()
-                    .index(indexName)
-                    .source(stream, XContentType.JSON));
+            Stream<IndexRequest> indexRequestStream = noiseList.stream()
+                    .map(stream -> new IndexRequest()
+                             .index(indexName)
+                             .source(stream, XContentType.JSON));
 
             IndexRequest[] indexRequests = indexRequestStream.toArray(IndexRequest[]::new);
+
             request.add(indexRequests);
+            log.info("indexRequest Count : {}",indexRequests.length);
 
-            ActionListener<BulkResponse> listener = new ActionListener<BulkResponse>() {
-                @Override
-                public void onResponse(BulkResponse bulkItemResponses) {
-                    Iterator iterator = bulkItemResponses.iterator();
 
-                    while (iterator.hasNext()){
-                        log.info(String.valueOf(iterator.next()));
-                    }
-                    log.info("##### Success Noise Data Bulk. indexName = {}",indexName);
-                }
-
-                @Override
-                public void onFailure(Exception e) {
-                    log.error("##### Failed Noise Data Bulk. ",e);
-                }
-            };
+//            ActionListener<BulkResponse> listener = new ActionListener<BulkResponse>() {
+//                @Override
+//                public void onResponse(BulkResponse bulkItemResponses) {
+//                    for (org.elasticsearch.action.bulk.BulkItemResponse bulkItemResponse : bulkItemResponses) {
+//                        log.info(String.valueOf(bulkItemResponse));
+//                    }
+//                    log.info("##### Success Noise Data Bulk. indexName = {}",indexName);
+//                }
+//
+//                @Override
+//                public void onFailure(Exception e) {
+//                    log.error("##### Failed Noise Data Bulk. ",e);
+//                }
+//            };
 //            restHighLevelClient().bulkAsync(request,RequestOptions.DEFAULT,listener);
+            StopWatch stopWatch = new StopWatch();
+            stopWatch.start();
+
             BulkResponse bulkItemResponses = restHighLevelClient().bulk(request, RequestOptions.DEFAULT);
             log.info(Arrays.toString(bulkItemResponses.getItems()));
+
+            stopWatch.stop();
+            System.out.println(stopWatch.prettyPrint());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -252,7 +286,7 @@ public class EsHighConfiguration {
                         BackoffPolicy.exponentialBackoff(TimeValue.timeValueMillis(100), 3));
 
         BulkProcessor bulkProcessor = bulkProcessorBuilder.build();
-
+        log.info(bulkProcessor.toString());
 //        bulkProcessor.add(getData("test_data_small_1.txt"));
 
     }

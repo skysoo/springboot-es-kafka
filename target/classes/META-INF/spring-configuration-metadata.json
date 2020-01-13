@@ -13,6 +13,11 @@
       "sourceType": "com.elastic.config.Properties"
     },
     {
+      "name": "elasticsearch.filepath",
+      "type": "java.lang.String",
+      "sourceType": "com.elastic.config.Properties"
+    },
+    {
       "name": "elasticsearch.host",
       "type": "java.lang.String",
       "sourceType": "com.elastic.config.Properties"

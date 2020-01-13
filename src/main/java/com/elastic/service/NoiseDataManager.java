@@ -1,5 +1,6 @@
 package com.elastic.service;
 
+import com.google.gson.internal.LinkedTreeMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
@@ -35,11 +38,16 @@ public class NoiseDataManager {
                         .collect(Collectors.joining());
     }
 
-    public LinkedHashMap<Integer, String> getRandomAccessData(String fileName,int lineNum,int bundleNum) throws IOException {
+    /**
+     * fileName : Bulk Data File Path
+     * lineNum : number of line
+     * bundleNum : number of bundle
+     **/
+    public LinkedTreeMap<String, String> getRandomAccessData(String fileName, int lineNum, int bundleNum) throws IOException {
         File file = new File(fileName);
         RandomAccessFile randomAccessFile = new RandomAccessFile(file,"r");
-//        long random = new Random().nextInt((int) (randomAccessFile.length()-11400000));
-        long random = new Random().nextInt((int) (randomAccessFile.length()));
+        long random = new Random().nextInt((int) (randomAccessFile.length()-11400000));
+//        long random = new Random().nextInt((int) (randomAccessFile.length()));
         log.info("##### File is {}",fileName);
 
         // random 위치에서부터 지정된 크기 만큼 파일 읽기
@@ -48,7 +56,7 @@ public class NoiseDataManager {
         String line="";
         StringBuilder sb = new StringBuilder();
         int count=0;
-        LinkedHashMap<Integer, String> noiseMap = new LinkedHashMap<>();
+        LinkedTreeMap<String, String> noiseMap = new LinkedTreeMap<>();
 
 
         while ((line=randomAccessFile.readLine()) != null){
@@ -59,10 +67,10 @@ public class NoiseDataManager {
             count++;
 
             if (count%lineNum==0){
-                noiseMap.put(sb.toString().hashCode(),sb.toString());
-                sb = new StringBuilder();
+                log.info("##### current count : {}",count);
             }
             if (count==bundleNum){
+                noiseMap.put(String.valueOf(sb.toString().hashCode()),sb.toString());
                 break;
             }
         }

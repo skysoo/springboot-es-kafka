@@ -15,6 +15,15 @@ public class Properties {
     private String host;
     private int port;
     private String cluster;
+    private String filepath;
+
+    public String getFilepath() {
+        return filepath;
+    }
+
+    public void setFilepath(String filepath) {
+        this.filepath = filepath;
+    }
 
     public String getProtocol() {
         return protocol;

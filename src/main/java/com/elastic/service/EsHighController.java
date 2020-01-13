@@ -45,6 +45,12 @@ public class EsHighController {
     }
 
     @LogExecutionTime
+    @PostMapping("/post_index_noise")
+    public void esIndexNoise(@RequestParam String indexName,@RequestParam int lineNum,@RequestParam int bundleNum) {
+        esHighConfiguration.indexNoiseData(indexName, lineNum, bundleNum);
+    }
+
+    @LogExecutionTime
     @PostMapping("/post_bulk_noise")
     public void esBulkNoise(@RequestParam String indexName,@RequestParam int lineNum,@RequestParam int bundleNum){
         esHighConfiguration.bulkNoiseData(indexName,lineNum,bundleNum);
