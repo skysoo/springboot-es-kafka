@@ -22,9 +22,23 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.12</version>
       <scope>test</scope>
     </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka -->
+<!--    <dependency>-->
+<!--      <groupId>org.springframework.kafka</groupId>-->
+<!--      <artifactId>spring-kafka</artifactId>-->
+<!--      <version>2.4.0.RELEASE</version>-->
+<!--    </dependency>-->
+    <!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-stream-kafka -->
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-stream-kafka</artifactId>
+      <version>3.0.1.RELEASE</version>
+    </dependency>
+
 
     <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter -->
     <dependency>
@@ -60,6 +74,15 @@
       <artifactId>spring-boot-starter-web</artifactId>
       <version>2.2.2.RELEASE</version>
     </dependency>
+
+    <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <version>2.2.2.RELEASE</version>
+      <scope>test</scope>
+    </dependency>
+
 
     <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
     <dependency>

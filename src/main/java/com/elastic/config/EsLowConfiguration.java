@@ -23,10 +23,10 @@ import java.security.NoSuchAlgorithmException;
 @Configuration
 public class EsLowConfiguration {
 
-    private final Properties properties;
+    private final EsProperties esProperties;
 
-    public EsLowConfiguration(Properties properties) {
-        this.properties = properties;
+    public EsLowConfiguration(EsProperties esProperties) {
+        this.esProperties = esProperties;
     }
 
     public RestClient restLowLevelClient() {
@@ -35,7 +35,7 @@ public class EsLowConfiguration {
             SSLContext sc = SSLContext.getInstance("SSL");
             InitHttpsIgnore.TrustManager(sc);
 
-        restClient = RestClient.builder(new HttpHost(properties.getHost(),properties.getPort(),properties.getProtocol()))
+        restClient = RestClient.builder(new HttpHost(esProperties.getHost(), esProperties.getPort(), esProperties.getProtocol()))
                                                     .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
                                                         @Override
                                                         public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpAsyncClientBuilder) {

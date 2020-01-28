@@ -42,8 +42,9 @@ public class NoiseDataManager {
      * fileName : Bulk Data File Path
      * lineNum : number of line
      * bundleNum : number of bundle
-     **/
-    public LinkedTreeMap<String, String> getRandomAccessData(String fileName, int lineNum, int bundleNum) throws IOException {
+     *
+     * @return*/
+    public List<LinkedTreeMap<String, String>> getRandomAccessData(String fileName, int lineNum, int bundleNum) throws IOException {
         File file = new File(fileName);
         RandomAccessFile randomAccessFile = new RandomAccessFile(file,"r");
         long random = new Random().nextInt((int) (randomAccessFile.length()-11400000));
@@ -57,7 +58,7 @@ public class NoiseDataManager {
         StringBuilder sb = new StringBuilder();
         int count=0;
         LinkedTreeMap<String, String> noiseMap = new LinkedTreeMap<>();
-
+        List<LinkedTreeMap<String, String>> noiseList = new ArrayList<>();
 
         while ((line=randomAccessFile.readLine()) != null){
             if(count!=0){
@@ -68,17 +69,21 @@ public class NoiseDataManager {
 
             if (count%lineNum==0){
                 log.info("##### current count : {}",count);
+                noiseMap.put(String.valueOf(sb.toString().hashCode()),sb.toString());
+                noiseList.add(noiseMap);
+                // map과 sb 초기화
+                sb = new StringBuilder();
+                noiseMap = new LinkedTreeMap<>();
             }
             if (count==bundleNum){
-                noiseMap.put(String.valueOf(sb.toString().hashCode()),sb.toString());
                 break;
             }
         }
         randomAccessFile.close();
-        log.info("noise count : {}",count);
-        log.info("noise Map length : {}",noiseMap.size());
+        log.info("##### noise count : {}",count);
+        log.info("##### noise List length : {}",noiseList.size());
 
-        return noiseMap;
+        return noiseList;
     }
 
     public List<String> getFileList(String path){

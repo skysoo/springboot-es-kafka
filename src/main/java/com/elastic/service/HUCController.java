@@ -2,7 +2,7 @@ package com.elastic.service;
 
 import com.elastic.aop.LogExecutionTime;
 import com.elastic.config.HUCConfiguration;
-import com.elastic.config.Properties;
+import com.elastic.config.EsProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,18 +17,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/es")
 public class HUCController {
     private String noiseData = null;
-    private final Properties properties;
+    private final EsProperties esProperties;
     private final HUCConfiguration HUCConfiguration;
     private final NoiseDataManager noiseDataManager;
 
-    public HUCController(HUCConfiguration HUCConfiguration, Properties properties, NoiseDataManager noiseDataManager) {
+    public HUCController(HUCConfiguration HUCConfiguration, EsProperties esProperties, NoiseDataManager noiseDataManager) {
         this.HUCConfiguration = HUCConfiguration;
-        this.properties = properties;
+        this.esProperties = esProperties;
         this.noiseDataManager = noiseDataManager;
     }
 
     private String urlStr(){
-        return properties.getProtocol()+"://"+properties.getHost()+":"+properties.getPort()+"/";
+        return esProperties.getProtocol()+"://"+ esProperties.getHost()+":"+ esProperties.getPort()+"/";
     }
 
     @LogExecutionTime

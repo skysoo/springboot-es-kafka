@@ -2,36 +2,67 @@
   "groups": [
     {
       "name": "elasticsearch",
-      "type": "com.elastic.config.Properties",
-      "sourceType": "com.elastic.config.Properties"
+      "type": "com.elastic.config.EsProperties",
+      "sourceType": "com.elastic.config.EsProperties"
+    },
+    {
+      "name": "kafka",
+      "type": "com.elastic.config.KafkaProperties",
+      "sourceType": "com.elastic.config.KafkaProperties"
     }
   ],
   "properties": [
     {
       "name": "elasticsearch.cluster",
       "type": "java.lang.String",
-      "sourceType": "com.elastic.config.Properties"
+      "sourceType": "com.elastic.config.EsProperties"
     },
     {
       "name": "elasticsearch.filepath",
       "type": "java.lang.String",
-      "sourceType": "com.elastic.config.Properties"
+      "sourceType": "com.elastic.config.EsProperties"
     },
     {
       "name": "elasticsearch.host",
       "type": "java.lang.String",
-      "sourceType": "com.elastic.config.Properties"
+      "sourceType": "com.elastic.config.EsProperties"
+    },
+    {
+      "name": "elasticsearch.indexname",
+      "type": "java.lang.String",
+      "sourceType": "com.elastic.config.EsProperties"
     },
     {
       "name": "elasticsearch.port",
       "type": "java.lang.Integer",
-      "sourceType": "com.elastic.config.Properties",
+      "sourceType": "com.elastic.config.EsProperties",
       "defaultValue": 0
     },
     {
       "name": "elasticsearch.protocol",
       "type": "java.lang.String",
-      "sourceType": "com.elastic.config.Properties"
+      "sourceType": "com.elastic.config.EsProperties"
+    },
+    {
+      "name": "kafka.consumergroup",
+      "type": "java.lang.String",
+      "sourceType": "com.elastic.config.KafkaProperties"
+    },
+    {
+      "name": "kafka.doccount",
+      "type": "java.lang.Integer",
+      "sourceType": "com.elastic.config.KafkaProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "kafka.servers",
+      "type": "java.lang.String",
+      "sourceType": "com.elastic.config.KafkaProperties"
+    },
+    {
+      "name": "kafka.topicname",
+      "type": "java.lang.String",
+      "sourceType": "com.elastic.config.KafkaProperties"
     }
   ],
   "hints": []
