@@ -1,6 +1,6 @@
 package com.elastic.plugins.kafka.producer;
 
-import com.elastic.config.KafkaProperties;
+import com.elastic.configuration.KafkaProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
@@ -52,7 +52,7 @@ public class SenderConfig {
         return new KafkaTemplate<>(producerFactory());
     }
 
-    public void send(String msg) {
+    public void highLevelSender(String msg) {
         log.info("sending to topic = {}", kafkaProperties.getTopicname());
         int size = 0;
         final int docCount = kafkaProperties.getDoccount();

@@ -1,7 +1,7 @@
 package com.elastic.service;
 
 import com.elastic.aop.LogExecutionTime;
-import com.elastic.config.EsHighConfiguration;
+import com.elastic.configuration.EsHighConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 

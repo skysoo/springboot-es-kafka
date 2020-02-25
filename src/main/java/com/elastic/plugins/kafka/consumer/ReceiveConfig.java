@@ -1,6 +1,6 @@
 package com.elastic.plugins.kafka.consumer;
 
-import com.elastic.config.KafkaProperties;
+import com.elastic.configuration.KafkaProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -43,9 +43,9 @@ public class ReceiveConfig {
         props.put(org.apache.kafka.clients.consumer.ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(ConsumerConfig.REQUEST_TIMEOUT_MS_CONFIG,180000);
         props.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG,150000);
-        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG,30000);
-        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,30);
-        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,90000);
+        props.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG,60000);
+        props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG,kafkaProperties.getPollrecords());
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG,kafkaProperties.getPollinterval());
         props.put(org.apache.kafka.clients.consumer.ConsumerConfig.FETCH_MAX_BYTES_CONFIG, 1024 * 1024 * 50);
         props.put(org.apache.kafka.clients.consumer.ConsumerConfig.MAX_PARTITION_FETCH_BYTES_CONFIG, 1024 * 1024 * 50);
         return props;
@@ -67,12 +67,16 @@ public class ReceiveConfig {
         final Consumer<String,String> consumer = consumerFactory().createConsumer();
         final Map<String,String> consumerMap = new HashMap<>();
         final List<Map<String,String>> consumerList = new ArrayList<>();
+
         consumer.subscribe(Arrays.asList(kafkaProperties.getTopicname()));
 
-        final int giveUp = 70;
+        Integer giveUp = kafkaProperties.getGiveup();
+        Integer duration = kafkaProperties.getPollduration();
+        log.info("giveUp : {}, duration : {}",giveUp,duration);
+
         int noRecordsCount = 0;
         while (true){
-            final ConsumerRecords<String,String> consumerRecords = consumer.poll(Duration.ofSeconds(15));
+            final ConsumerRecords<String,String> consumerRecords = consumer.poll(Duration.ofSeconds(duration));
 
             if (consumerRecords.count() == 0){
                 noRecordsCount++;

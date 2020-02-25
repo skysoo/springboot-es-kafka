@@ -1,8 +1,8 @@
 package com.elastic.service;
 
 import com.elastic.aop.LogExecutionTime;
-import com.elastic.config.HUCConfiguration;
-import com.elastic.config.EsProperties;
+import com.elastic.configuration.HUCConfiguration;
+import com.elastic.configuration.EsProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +48,7 @@ public class HUCController {
     @LogExecutionTime
     @GetMapping("/get_doc_search")
     public void esDocSearch(@RequestParam String indexName,@RequestParam String method){
-       if(HUCConfiguration.get(urlStr()+indexName+"/_search?pretty",method))
+       if(HUCConfiguration.get(urlStr()+indexName+"/_search?size=1",method))
            log.info("##### {} search the data ",indexName);
     }
 

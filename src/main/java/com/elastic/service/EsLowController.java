@@ -1,7 +1,7 @@
 package com.elastic.service;
 
 import com.elastic.aop.LogExecutionTime;
-import com.elastic.config.EsLowConfiguration;
+import com.elastic.configuration.EsLowConfiguration;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

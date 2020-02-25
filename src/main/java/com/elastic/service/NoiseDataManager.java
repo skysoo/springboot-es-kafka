@@ -99,4 +99,24 @@ public class NoiseDataManager {
         }
         return fileList;
     }
+
+    /**
+     * Test용도 10000hz짜리 1분 데이터 1건의 소음 데이터만 추출하여 뽑아내는 용도
+     * @return String
+     **/
+    public String getSingleNoiseData(String file) {
+        LinkedTreeMap<String, String> noiseMap = null;
+        String mapKey = null;
+        try {
+            noiseMap = getRandomAccessData(file, 600000, 600000).get(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert noiseMap != null;
+        for (String key : noiseMap.keySet())
+            mapKey = key;
+        return noiseMap.get(mapKey);
+    }
+
+
 }

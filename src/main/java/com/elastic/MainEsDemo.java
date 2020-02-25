@@ -22,6 +22,5 @@ public class MainEsDemo {
 
     void _main(String[] args) {
         SpringApplication.run(MainEsDemo.class, args);
-
     }
 }
