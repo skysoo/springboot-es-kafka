@@ -10,6 +10,7 @@ import org.postgresql.replication.PGReplicationStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.stereotype.Component;
 
 import java.nio.ByteBuffer;
 import java.sql.Connection;
@@ -24,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  * @since 2020-02-11 오후 4:44
  **/
 @Slf4j
-//@Component
+@Component
 public class PostgresEventListener implements ApplicationRunner {
     @Autowired
     private CommonProperties commonProperties;
@@ -51,12 +52,12 @@ public class PostgresEventListener implements ApplicationRunner {
             PGConnection replConnection = con.unwrap(PGConnection.class);
             System.out.println("DEBUG200");
 
-//        replConnection.getReplicationAPI()
-//                .createReplicationSlot()
-//                .logical()
-//                .withSlotName("repl_slot_02")
-//                .withOutputPlugin("test_decoding")
-//                .make();
+        replConnection.getReplicationAPI()
+                .createReplicationSlot()
+                .logical()
+                .withSlotName("repl_slot_02")
+                .withOutputPlugin("test_decoding")
+                .make();
 
             PGReplicationStream stream = replConnection.getReplicationAPI()
                     .replicationStream()
