@@ -52,12 +52,12 @@ public class PostgresEventListener implements ApplicationRunner {
             PGConnection replConnection = con.unwrap(PGConnection.class);
             System.out.println("DEBUG200");
 
-//        replConnection.getReplicationAPI()
-//                .createReplicationSlot()
-//                .logical()
-//                .withSlotName("repl_slot_02")
-//                .withOutputPlugin("test_decoding")
-//                .make();
+        replConnection.getReplicationAPI()
+                .createReplicationSlot()
+                .logical()
+                .withSlotName("repl_slot_02")
+                .withOutputPlugin("test_decoding")
+                .make();
 
             PGReplicationStream stream = replConnection.getReplicationAPI()
                     .replicationStream()
